@@ -14,7 +14,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 st.set_page_config(page_title="Stock Price Prediction", page_icon=":moneybag:")
 
 # Page title
-st.title("Stock Price Visualization")
+st.title("Stock Price Visualization and Prediction :moneybag:")
 
 # Create a form for user inputs
 with st.form("user_inputs"):
@@ -205,18 +205,18 @@ def main():
 
     # Create sidebar section for app description and links
     # Sidebar content
-    st.sidebar.header("Stock Market Trend Predictor :moneybag:")
-    st.sidebar.write("Description :male-detective:")
+    st.sidebar.header("#Stock Market Trend Predictor :moneybag:")
+    st.sidebar.write("##Description :male-detective:")
     st.sidebar.write("""
     This web app visualizes historical stock prices and predicts future trends using deep learning techniques. It analyzes stock prices over a specified period, calculates moving averages, and uses a Long Short-Term Memory (LSTM) neural network to predict future price movements.
         
-    \nSkills Enhanced:\n
+    \n###Skills Enhanced:\n
     - 📈 Time Series Analysis
     - 💻 Deep Learning
     - 🐍 Python
     - 📊 Data Visualization
 
-    \nSteps:\n
+    \n###Steps:\n
     1. Data Acquisition: Fetch historical stock prices using the Yahoo Finance API.
     2. Data Preprocessing: Clean data, calculate moving averages, and prepare training/testing sets.
     3. Data Visualization: Visualize stock prices, moving averages, and predictive model results.
@@ -225,13 +225,13 @@ def main():
 
     By leveraging deep learning, this app helps users understand stock price trends and make informed investment decisions.
             
-    \n**Credits** 🌟\n
-    Developer: Aniket Panchal
-    GitHub: [Aniket2021448](https://github.com/Aniket2021448)
+    \n**###Credits** 🌟
+    \nDeveloper: Aniket Panchal
+    \nGitHub: [Aniket2021448](https://github.com/Aniket2021448)
 
-    \n**Contact** 📧\n
-    For inquiries or feedback, please contact aniketpanchal1257@gmail.com
-    **Portfolio** 💼\n
+    \n**###Contact** 📧
+    \nFor inquiries or feedback, please contact aniketpanchal1257@gmail.com
+    \n**Portfolio** 💼
     \nCheck out my portfolio website: [Your Portfolio Website Link](https://aniket2021448.github.io/My-portfolio/)
     """)
     
