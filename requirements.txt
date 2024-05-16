@@ -1,8 +1,7 @@
-streamlit 
-numpy 
+streamlit
+numpy
 pandas
 matplotlib
-sklearn
-yfinance 
-datetime
-keras 
+scikit-learn
+yfinance
+keras
