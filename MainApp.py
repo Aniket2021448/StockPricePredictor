@@ -5,14 +5,18 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 import yfinance as yf
 import datetime as datetime
-from keras.layers import Dense, LSTM, Dropout
-from keras.models import Sequential, load_model
+from keras.models import load_model
 
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.metrics import mean_absolute_error, root_mean_squared_error
 
 
 st.set_page_config(page_title="Stock Price Prediction", page_icon=":moneybag:")
+prediction_start_date = last_60_days_comparison = 60
+future_30_days = 30
 
+# Initialize session state for metrics visibility
+if 'show_metrics' not in st.session_state:
+    st.session_state.show_metrics = False
 # Page title
 st.title("Stock Price Visualization and Prediction :moneybag:")
 
@@ -142,34 +146,91 @@ if submit_button:
     y_test_actual = y_test * scale_factor
     y_pred_actual = y_pred * scale_factor
 
-    pred_fig = plt.figure(figsize=(14, 5))
-    plt.plot(y_test, 'g', label='Actual')
-    plt.plot(y_pred, 'b', label='Predicted')
+    pred_fig = plt.figure(figsize=(10, 6))
+    plt.plot(y_test_actual, 'g', label='Actual')
+    plt.plot(y_pred_actual, 'b', label='Predicted')
     plt.title('Actual vs Predicted')
     plt.legend()
     # plt.show()
     st.pyplot(pred_fig)
     prediction_load_state.text("\n\nPredictions made successfully!")
 
+    st.write("The model's prediction for the next week is as follows:")
+    st.write("Precaution: Stock market is based on other factors as well, so don't just rely on this model for your investments.")
+    st.write("Please consult your financial advisor before making any investment decisions.")
 
-    metric_show_state = st.text("\n\nCalculating the model metrics...")
+    # The model uses last 100 days, to predict the 101 th day, we need to predict the data using the mix of previous 100 days data and the next day data.
+    # So, we need to append the last 100 days of training data to the testing data.
+    # This is done to make the model predict the next day data, using the previous 100 days data.
+
+    # Now, let's predict the next day data, using the last 100 days data.   
+    # next_day_data = testing_data_array[-100:]
+    # next_day_data = np.reshape(next_day_data, (1, 100, 1))
+    # next_day_prediction = model.predict(next_day_data)
+    # next_day_prediction = next_day_prediction * scale_factor
+    # st.write("The model predicts the next day's stock price to be: ", next_day_prediction[0][0])
+    # Now, show a plot showing the previous scenario and the upcoming 7 days trend stock prediction 
+    # using the LSTM model.
+    st.subheader("Stock Price Prediction for the next 30 days")
+
+
+
+    predictions = []
+    # st.write(next_day_data = testing_data_array[-100:])
+
+    for i in range(1, last_60_days_comparison + future_30_days + 1):
+        next_day_data = testing_data_array[-160: -60]
+        next_day_data = np.reshape(next_day_data, (1, 100, 1)) # reshaping the data
+        next_day_prediction = model.predict(next_day_data) 
+
+        predictions.append(next_day_prediction[0][0])
+        testing_data_array = np.append(testing_data_array, next_day_prediction)
+        testing_data_array = np.reshape(testing_data_array, (testing_data_array.shape[0], 1))
+        next_day_data = testing_data_array[-100:]
+        next_day_data = np.reshape(next_day_data, (1, 100, 1))
+
+    # 30 days previous + 30 days future
+
+
+    predictions = np.array(predictions)
+    predictions = predictions * scale_factor
+
+    # Create a combined list of days (30 days actual and their predictions along the future 30 days prediction)
+    combined_days = [i for i in range(1, last_60_days_comparison + future_30_days + 1)] # last 30 days actual + next 30 days prediction
+
+
+    # Plot the results
+    fig = plt.figure(figsize=(10, 6))
+    plt.plot(combined_days, predictions, 'ro-')
+    plt.plot(y_test_actual[-last_60_days_comparison:], 'bo-')
+    plt.axvline(x=prediction_start_date, color='b', linestyle='--', label='Prediction Start')
+    plt.xlabel("Days")
+    plt.ylabel("Price")
+    plt.title("Stock Price Prediction for the next 45 days")
+    plt.legend(['Predicted', 'Prediction Start'])
+    st.pyplot(fig)
+
+
+    st.subheader("Model Metrics")
+    metric_show_state = st.text("Calculating the model metrics...")
+    
     y_pred_train = model.predict(x_train)
-
-    mae = mean_absolute_error(y_train, y_pred_train)
-    rmse = mean_squared_error(y_train, y_pred_train, squared=False)
+    mae_train = mean_absolute_error(y_train, y_pred_train)
+    rmse_train = root_mean_squared_error(y_train, y_pred_train)
     st.subheader("Model Metrics for Training Data")
-    st.write("Mean Absolute Error: ", mae)
-    st.write("Root Mean Squared Error: ", rmse)
+    st.write("Mean Absolute Error: ", mae_train)
+    st.write("Root Mean Squared Error: ", rmse_train)
 
+    mae_test = mean_absolute_error(y_test, y_pred)
+    rmse_test = root_mean_squared_error(y_test, y_pred)
     st.subheader("Model Metrics for Testing Data")
-    mae = mean_absolute_error(y_test, y_pred)
-    rmse = mean_squared_error(y_test, y_pred, squared=False)
-    st.write("Mean Absolute Error: ", mae)
-    st.write("Root Mean Squared Error: ", rmse)
-    metric_show_state.text("\n\nModel metrics calculated successfully!")
+    st.write("Mean Absolute Error: ", mae_test)
+    st.write("Root Mean Squared Error: ", rmse_test)
+    metric_show_state.text("Model metrics calculated successfully!")
 
+    
 
-
+    
 
 def main():
     
@@ -191,32 +252,20 @@ def main():
 
     st.balloons()
 
-    # Web content starts
-    # Navbar starts
-        # Create the Streamlit app
-    col1, col2 = st.columns([1, 10])
-    with col1:
-        st.header("	:moneybag:")
-    with col2:
-        st.header("Stock Market Trend predictor")
-        
-
-    
-
     # Create sidebar section for app description and links
     # Sidebar content
-    st.sidebar.header("#Stock Market Trend Predictor :moneybag:")
-    st.sidebar.write("##Description :male-detective:")
+    st.sidebar.header("Stock Market Trend Predictor :moneybag:")
+    st.sidebar.write("Description :male-detective:")
     st.sidebar.write("""
     This web app visualizes historical stock prices and predicts future trends using deep learning techniques. It analyzes stock prices over a specified period, calculates moving averages, and uses a Long Short-Term Memory (LSTM) neural network to predict future price movements.
         
-    \n###Skills Enhanced:\n
+    \nSkills Enhanced:\n
     - 📈 Time Series Analysis
     - 💻 Deep Learning
     - 🐍 Python
     - 📊 Data Visualization
 
-    \n###Steps:\n
+    \nSteps:\n
     1. Data Acquisition: Fetch historical stock prices using the Yahoo Finance API.
     2. Data Preprocessing: Clean data, calculate moving averages, and prepare training/testing sets.
     3. Data Visualization: Visualize stock prices, moving averages, and predictive model results.
@@ -225,11 +274,11 @@ def main():
 
     By leveraging deep learning, this app helps users understand stock price trends and make informed investment decisions.
             
-    \n**###Credits** 🌟
+    \n**Credits** 🌟
     \nDeveloper: Aniket Panchal
     \nGitHub: [Aniket2021448](https://github.com/Aniket2021448)
 
-    \n**###Contact** 📧
+    \n**Contact** 📧
     \nFor inquiries or feedback, please contact aniketpanchal1257@gmail.com
     \n**Portfolio** 💼
     \nCheck out my portfolio website: [Your Portfolio Website Link](https://aniket2021448.github.io/My-portfolio/)
