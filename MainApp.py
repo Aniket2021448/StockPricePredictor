@@ -155,7 +155,7 @@ if submit_button:
     st.pyplot(pred_fig)
     prediction_load_state.text("\n\nPredictions made successfully!")
 
-    st.write("The model's prediction for the next week is as follows:")
+    st.write("The model's prediction for the next month is as follows:")
     st.write("Precaution: Stock market is based on other factors as well, so don't just rely on this model for your investments.")
     st.write("Please consult your financial advisor before making any investment decisions.")
 
